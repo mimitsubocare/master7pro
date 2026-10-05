@@ -92,6 +92,17 @@ button:active{transform:scale(.985)}
 #missingBox .intruderPick.correct{background:#dff5e9!important;border-color:#55b987!important;color:#176b48!important}
 #missingBox .intruderPick.wrong{background:#ffe1e5!important;border-color:#e77d8d!important;color:#a12e42!important}
 #missingBox .intruderPick:disabled{opacity:1}
+
+.finalEarWrap{position:relative;width:min(270px,74vw);margin:14px auto}
+.finalEarWrap img{display:block;width:100%;height:auto}
+.finalTarget{position:absolute;width:22px;height:22px;border-radius:50%;background:#e94f71;border:4px solid #fff;box-shadow:0 0 0 4px rgba(233,79,113,.25);transform:translate(-50%,-50%)}
+.finalNote{font-size:13px;color:#8a6670;margin-top:7px}
+.finalReview{margin-top:12px;padding:12px;border-radius:16px;background:#fff7fa;line-height:1.8}
+
+.practicalEar{position:relative;width:min(330px,82vw);margin:16px auto;touch-action:manipulation}
+.practicalEar img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.tapMark{position:absolute;width:22px;height:22px;border-radius:50%;border:4px solid #fff;background:#9a6b78;box-shadow:0 0 0 3px rgba(154,107,120,.25);transform:translate(-50%,-50%);pointer-events:none}
+.practicalBadge{display:inline-block;padding:7px 13px;border-radius:999px;background:#fff0f4;font-weight:800;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -269,18 +280,69 @@ function startRoleQuiz(){
  document.getElementById("quizTitle").textContent="ごちゃまぜ練習";
  openScreen("quiz");renderQ();
 }
+let finalMistakes=[];
+let finalPhase="knowledge", practicalOrder=[], practicalIndex=0, practicalScore=0, practicalLocked=false;
+let knowledgeScore=0;
+
+function makeFinalQuestions(){
+ const nonMaster=all50.filter(n=>!mNames.includes(n));
+ const qs=[];
+
+ // 1. 耳画像に● → このツボ誰？ ×2
+ shuffle(master7).slice(0,2).forEach(p=>{
+   qs.push({type:"ear",label:p.name,answer:p.name,
+     q:`この●のツボ誰？<div class="finalEarWrap"><img src="./ear_base.PNG" alt="耳つぼ位置図"><span class="finalTarget" style="left:${master7Pos[p.name][0]}%;top:${master7Pos[p.name][1]}%"></span></div>`,
+     choices:shuffle([p.name,...shuffle(nonMaster).slice(0,3)])});
+ });
+
+ // 2. 役割は？ ×2
+ shuffle(master7).slice(0,2).forEach(p=>{
+   const roles=master7.filter(x=>x.name!==p.name).map(x=>x.role);
+   qs.push({type:"role",label:p.name,answer:p.role,q:`<b>${p.name}</b><br>役割は？`,
+     choices:shuffle([p.role,...shuffle(roles).slice(0,3)])});
+ });
+
+ // 3. ツボ名は？ ×2
+ shuffle(master7).slice(0,2).forEach(p=>{
+   qs.push({type:"name",label:p.name,answer:p.name,q:`「${p.role}」<br>ツボ名は？`,
+     choices:shuffle([p.name,...shuffle(nonMaster).slice(0,3)])});
+ });
+
+ // 4. 別名は？ ×2（別名のあるMASTER7から）
+ const aliasPool=shuffle(aliases);
+ aliasPool.slice(0,2).forEach(p=>{
+   const otherAliases=aliases.filter(x=>x.name!==p.name).map(x=>x.alias);
+   const fillers=["別名なし","バランスポイント","リラックスポイント","ホルモンポイント"];
+   qs.push({type:"alias",label:p.name,answer:p.alias,q:`<b>${p.name}</b><br>別名は？`,
+     choices:shuffle([p.alias,...shuffle([...otherAliases,...fillers].filter(x=>x!==p.alias)).slice(0,3)])});
+ });
+
+ // 5. 正しい「ツボ名×役割」 ×2
+ shuffle(master7).slice(0,2).forEach(p=>{
+   const wrongRoles=shuffle(master7.filter(x=>x.name!==p.name)).slice(0,3);
+   qs.push({type:"pair",label:p.name,answer:`${p.name} ＝ ${p.role}`,
+     q:"正しい「ツボ名 × 役割」の組み合わせは？",
+     choices:shuffle([`${p.name} ＝ ${p.role}`,...wrongRoles.map(x=>`${p.name} ＝ ${x.role}`)])});
+ });
+ return shuffle(qs); // 知識10問
+}
+
 function startFinal(){
- mode="final";questions=buildMixed(15,true);qi=0;score=0;
+ mode="final";finalPhase="knowledge";questions=makeFinalQuestions();qi=0;score=0;knowledgeScore=0;
+ practicalScore=0;finalMistakes=[];practicalOrder=shuffle(master7.map(x=>x.name));practicalIndex=0;
  document.getElementById("quizTitle").textContent="MASTER 7 最終テスト";
  openScreen("quiz");renderQ();
 }
+
 function renderQ(){
  locked=false;
  const q=questions[qi];
- document.getElementById("qno").textContent=`Q ${qi+1} / ${questions.length}`;
+ document.getElementById("qno").textContent=`知識 Q ${qi+1} / ${questions.length}`;
  document.getElementById("bar").style.width=`${(qi/questions.length)*100}%`;
  document.getElementById("question").innerHTML=q.q;
- document.getElementById("feedback").textContent="答えを選んでな。";
+ document.getElementById("feedback").innerHTML=mode==="final"
+   ?`<b>最終テスト中</b><br><span class="finalNote">正解は最後まで内緒やで🤣</span>`
+   :"答えを選んでな。";
  document.getElementById("nextBtn").style.display="none";
  const c=document.getElementById("choices");c.innerHTML="";
  q.choices.forEach(v=>{
@@ -288,25 +350,79 @@ function renderQ(){
    b.onclick=()=>answerQ(v,b);c.appendChild(b);
  });
 }
+
 function answerQ(v,b){
  if(locked)return;locked=true;
- const q=questions[qi], buttons=[...document.querySelectorAll("#choices .choice")];
- buttons.forEach(x=>{
-   if(x.textContent===q.answer)x.classList.add("correct");
-   else if(x===b)x.classList.add("wrong");
- });
- if(v===q.answer){
-   score++;document.getElementById("feedback").innerHTML="○ 正解！<br>その調子やで。";
+ const q=questions[qi];
+ if(mode==="final"){
+   if(v===q.answer){score++;knowledgeScore++;}
+   else finalMistakes.push({label:q.label,answer:q.answer});
+   b.style.borderColor="#9a6b78";b.style.background="#fff4f7";
+   document.getElementById("feedback").innerHTML=`回答しました。<br><span class="finalNote">答え合わせは最後や🤣</span>`;
  }else{
-   document.getElementById("feedback").innerHTML=`× おしい！<br>正解は <b>${q.answer}</b>。`;
+   const buttons=[...document.querySelectorAll("#choices .choice")];
+   buttons.forEach(x=>{if(x.textContent===q.answer)x.classList.add("correct");else if(x===b)x.classList.add("wrong")});
+   if(v===q.answer){score++;document.getElementById("feedback").innerHTML="○ 正解！<br>その調子やで。";}
+   else document.getElementById("feedback").innerHTML=`× おしい！<br>正解は <b>${q.answer}</b>。`;
  }
  document.getElementById("bar").style.width=`${((qi+1)/questions.length)*100}%`;
  document.getElementById("nextBtn").style.display="block";
 }
+
 function nextQuestion(){
  qi++;
- if(qi>=questions.length){showResult(score,questions.length);return}
+ if(qi>=questions.length){
+   if(mode==="final"){startPractical();return}
+   showResult(score,questions.length);return;
+ }
  renderQ();
+}
+
+function startPractical(){
+ finalPhase="practical";practicalIndex=0;practicalLocked=false;
+ document.getElementById("quizTitle").textContent="耳つぼどこやねーん！";
+ renderPractical();
+}
+
+function renderPractical(){
+ practicalLocked=false;
+ const name=practicalOrder[practicalIndex];
+ document.getElementById("qno").textContent=`実技 ${practicalIndex+1} / 7`;
+ document.getElementById("bar").style.width=`${(practicalIndex/7)*100}%`;
+ document.getElementById("question").innerHTML=
+   `<span class="practicalBadge">最終実技</span><br><b>${name}</b> はどこやねーん！<div class="practicalEar" id="practicalEar"><img src="./ear_base.PNG" alt="耳つぼ位置図"></div>`;
+ document.getElementById("choices").innerHTML="";
+ document.getElementById("feedback").innerHTML=`耳の場所を直接タップしてな。<br><span class="finalNote">正解は最後まで内緒やで🤣</span>`;
+ document.getElementById("nextBtn").style.display="none";
+ const ear=document.getElementById("practicalEar");
+ ear.onclick=(e)=>answerPractical(e,name,ear);
+}
+
+function answerPractical(e,name,ear){
+ if(practicalLocked)return;practicalLocked=true;
+ const r=ear.getBoundingClientRect();
+ const x=(e.clientX-r.left)/r.width*100;
+ const y=(e.clientY-r.top)/r.height*100;
+ ear.insertAdjacentHTML("beforeend",`<span class="tapMark" style="left:${x}%;top:${y}%"></span>`);
+ const [tx,ty]=master7Pos[name];
+ // percentage-space distance, slightly forgiving for finger taps
+ const dx=x-tx,dy=y-ty;
+ const ok=Math.sqrt(dx*dx+dy*dy)<=7.5;
+ if(ok){practicalScore++;score++;}
+ else finalMistakes.push({label:`${name}（場所）`,answer:name});
+ document.getElementById("feedback").innerHTML=`回答しました。<br><span class="finalNote">場所の答え合わせも最後や🤣</span>`;
+ document.getElementById("bar").style.width=`${((practicalIndex+1)/7)*100}%`;
+ const nb=document.getElementById("nextBtn");
+ nb.style.display="block";
+ nb.textContent=practicalIndex===6?"採点するで":"次いくで";
+ nb.onclick=nextPractical;
+}
+
+function nextPractical(){
+ practicalIndex++;
+ const nb=document.getElementById("nextBtn");nb.onclick=nextQuestion;nb.textContent="次いくで";
+ if(practicalIndex>=7){showResult(score,17);return}
+ renderPractical();
 }
 
 function startMissing(){
@@ -405,17 +521,24 @@ function nextMissing(){
 }
 
 function showResult(s,total){
- score=s;
- openScreen("result");
+ score=s;openScreen("result");
  const pct=Math.round(s/total*100);
  document.getElementById("scoreText").textContent=`${s} / ${total}`;
  let rank,msg;
- if(pct===100){rank="MASTER 7 完全制覇！";msg="7人全員、ちゃんと頭におる🤣";}
+ if(pct===100){rank="MASTER 7 完全制覇！";msg="知識も場所も全員おる🤣";}
  else if(pct>=80){rank="ほぼマスター！";msg="あとちょい。ここまで来たら逃がさんで。";}
- else if(pct>=60){rank="ええ感じ！";msg="覚えてきてる。もう一周したら強い。";}
- else {rank="7人、まだ自由行動中🤣";msg="まず「7つを覚える」から回収しよ。";}
+ else if(pct>=60){rank="ええ感じ！";msg="覚えてきてる。弱いとこだけ回収しよ。";}
+ else {rank="7人、まだ自由行動中🤣";msg="「7つを覚える」から回収しよ。";}
  document.getElementById("rankText").textContent=rank;
- document.getElementById("resultMsg").textContent=msg;
+ let html=msg;
+ if(mode==="final"){
+   html+=`<div class="finalReview"><b>知識 ${knowledgeScore} / 10</b><br><b>場所 ${practicalScore} / 7</b><br>総合 ${s} / 17</div>`;
+   if(finalMistakes.length){
+     const uniq=[...new Set(finalMistakes.map(x=>x.label))];
+     html+=`<div class="finalReview"><b>ここだけ復習しよ🤣</b><br>${uniq.map(x=>`・${x}`).join("<br>")}</div>`;
+   }else html+=`<div class="finalReview"><b>復習なし。完全制覇や💮</b></div>`;
+ }
+ document.getElementById("resultMsg").innerHTML=html;
 }
 function retryCurrent(){
  if(mode==="role")startRoleQuiz();
