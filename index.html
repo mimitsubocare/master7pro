@@ -371,6 +371,7 @@ function answerQ(v,b){
  if(locked)return;locked=true;
  const q=questions[qi];
  const reaction=document.getElementById("quizReaction");
+ const isCorrect=(v===q.answer);
  if(mode==="final"){
    if(v===q.answer){score++;knowledgeScore++;}
    else finalMistakes.push({label:q.label,answer:q.answer});
@@ -380,9 +381,9 @@ function answerQ(v,b){
    const buttons=[...document.querySelectorAll("#choices .choice")];
    buttons.forEach(x=>{if(x.textContent===q.answer)x.classList.add("correct");else if(x===b)x.classList.add("wrong")});
    if(v===q.answer){score++;document.getElementById("feedback").innerHTML="○ 正解！<br>その調子やで。";
-     if(reaction){reaction.innerHTML='<img src="./mcs_correct.PNG" alt="正解">';reaction.className="quizReaction show";}}
+     if(reaction){reaction.innerHTML=`<img src="./${isCorrect?"mcs_correct.PNG":"mcs_skip.PNG"}" alt="${isCorrect?"正解":"不正解"}">`;reaction.className="quizReaction show";}}
    else document.getElementById("feedback").innerHTML=`× おしい！<br>正解は <b>${q.answer}</b>。`;
-     if(reaction){reaction.innerHTML='<img src="./mcs_skip.PNG" alt="不正解">';reaction.className="quizReaction show";}
+     if(reaction){reaction.innerHTML=`<img src="./${isCorrect?"mcs_correct.PNG":"mcs_skip.PNG"}" alt="${isCorrect?"正解":"不正解"}">`;reaction.className="quizReaction show";}
  }
  document.getElementById("bar").style.width=`${((qi+1)/questions.length)*100}%`;
  document.getElementById("nextBtn").style.display="block";
