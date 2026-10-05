@@ -172,6 +172,7 @@ button:active{transform:scale(.985)}
     <div class="question"><span id="missingTitle">MASTER 7から消えたん誰や？</span></div>
     <div class="missingBox" id="missingBox"></div>
     <div class="choices" id="missingChoices"></div>
+    <div id="missingReaction" class="quizReaction"></div>
     <div class="feedback" id="missingFeedback">抜けてる1つを当ててな。</div>
     <button id="missingNext" class="primary next" style="display:none" onclick="nextMissing()">次いくで</button>
   </div>
@@ -481,6 +482,8 @@ function renderMissing(){
  }
  const c=document.getElementById("missingChoices");
  c.innerHTML="";
+ const mr=document.getElementById("missingReaction");
+ if(mr){mr.className="quizReaction";mr.innerHTML="";}
 
  if(q.type==="missing"){
    // 6人＋？？？を毎回シャッフル
@@ -514,6 +517,7 @@ function renderMissing(){
 
 function answerMissing(v,b,answer,type){
  if(mlocked)return;mlocked=true;
+ const mr=document.getElementById("missingReaction");
  [...document.querySelectorAll("#missingChoices .choice")].forEach(x=>{
    if(x.textContent===answer)x.classList.add("correct");
    else if(x===b)x.classList.add("wrong");
@@ -524,12 +528,14 @@ function answerMissing(v,b,answer,type){
  }else{
    document.getElementById("missingFeedback").innerHTML=`× 足らんかったんは <b>${answer}</b> やで。`;
  }
+ if(mr){mr.innerHTML=`<img src="./${v===answer?"mcs_correct.PNG":"mcs_skip.PNG"}" alt="${v===answer?"正解":"不正解"}">`;mr.className="quizReaction show";}
  document.getElementById("mbar").style.width=`${((mi+1)/missingQuestions.length)*100}%`;
  document.getElementById("missingNext").style.display="block";
 }
 
 function answerIntruder(v,b,answer){
  if(mlocked)return;mlocked=true;
+ const mr=document.getElementById("missingReaction");
  document.querySelectorAll("#missingBox .intruderPick").forEach(x=>{
    if(x.dataset.name===answer)x.classList.add("correct");
    else if(x===b)x.classList.add("wrong");
@@ -541,6 +547,7 @@ function answerIntruder(v,b,answer){
  }else{
    document.getElementById("missingFeedback").innerHTML=`× 乱入してたんは <b>${answer}</b> やで🤣`;
  }
+ if(mr){mr.innerHTML=`<img src="./${v===answer?"mcs_correct.PNG":"mcs_skip.PNG"}" alt="${v===answer?"正解":"不正解"}">`;mr.className="quizReaction show";}
  document.getElementById("mbar").style.width=`${((mi+1)/missingQuestions.length)*100}%`;
  document.getElementById("missingNext").style.display="block";
 }
