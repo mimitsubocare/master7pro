@@ -104,38 +104,12 @@ button:active{transform:scale(.985)}
 .tapMark{position:absolute;width:22px;height:22px;border-radius:50%;border:4px solid #fff;background:#9a6b78;box-shadow:0 0 0 3px rgba(154,107,120,.25);transform:translate(-50%,-50%);pointer-events:none}
 .practicalBadge{display:inline-block;padding:7px 13px;border-radius:999px;background:#fff0f4;font-weight:800;margin-bottom:8px}
 
-.topbar .pageLogo{width:48px;height:48px;object-fit:contain;flex:0 0 48px;margin-left:auto}
-
-.topbar{
-  display:grid!important;
-  grid-template-columns:82px minmax(0,1fr) 48px!important;
-  align-items:center!important;
-  gap:8px!important;
-  width:100%!important;
-  margin-bottom:12px!important;
+#learn,#quiz,#missing,#result{position:relative}
+.cornerLogo{
+ position:absolute;right:2px;top:2px;width:42px;height:42px;
+ object-fit:contain;z-index:5;pointer-events:none
 }
-.topbar .back{width:82px!important;margin:0!important;padding:11px 8px!important}
-.topbar .title{
-  min-width:0!important;
-  text-align:center!important;
-  white-space:nowrap!important;
-  font-size:18px!important;
-  line-height:1.2!important;
-}
-.topbar .pageLogo{
-  display:block!important;
-  width:44px!important;
-  height:44px!important;
-  object-fit:contain!important;
-  margin:0!important;
-}
-
-.screen{width:100%!important;min-width:0!important}
-#learn{display:none!important}
-#learn.active{display:block!important}
-#learnList{display:block!important;width:100%!important;min-width:0!important;clear:both!important}
-#learnList>.card,#learnList>.allEarBox{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important}
-.topbar{position:relative!important;float:none!important}
+#learn .topbar,#quiz .topbar,#missing .topbar{padding-right:50px}
 </style>
 </head>
 <body>
@@ -160,12 +134,14 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="learn" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">7つを覚える<img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">7つを覚える</div></div>
   <div id="learnList"></div>
 </section>
 
 <section id="quiz" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div><img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div></div>
   <div class="card">
     <div class="qno" id="qno"></div>
     <div class="progress"><i id="bar"></i></div>
@@ -177,7 +153,8 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="missing" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">ひとり足らんで</div><img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">ひとり足らんで</div></div>
   <div class="card">
     <div class="qno" id="mno"></div>
     <div class="progress"><i id="mbar"></i></div>
@@ -190,7 +167,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="result" class="screen">
-  <div style="text-align:right;margin-bottom:6px"><img src="./mcs_logo.PNG" alt="協会ロゴ" style="width:48px;height:48px;object-fit:contain"></div>
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
   <div class="card result">
     <img class="smallchar" src="./MASTER7.PNG" alt="">
     <div class="kicker">RESULT</div>
