@@ -325,24 +325,29 @@ function renderMissing(){
  let opts, instruction;
 
  if(q.type==="missing"){
-   // 正解の1人を抜き、残り6人は毎回順番をバラバラにする
-   const shown=shuffle(names.filter(n=>n!==q.answer));
+   // 上段も毎回完全シャッフル。？？？の位置も固定しない
+   const shown=shuffle([...names.filter(n=>n!==q.answer),"？？？"]);
    document.getElementById("missingBox").innerHTML=
-     shown.map(n=>`<span class="pill">${n}</span>`).join("")+
-     `<span class="pill blank">？？？</span>`;
-   // 選択肢のハズレは50ツボからMASTER 7以外を乱入
+     shown.map(n=>`<span class="pill ${n==="？？？"?"blank":""}">${n}</span>`).join("");
+
+   // 消去法防止：下の選択肢は上に出ているMASTER 7を使わない。
+   // 正解1つ＋MASTER 7ではない50ツボから3つ
    opts=shuffle([q.answer,...shuffle(nonMaster).slice(0,3)]);
    instruction="ひとり足らんで。抜けてるMASTER 7は誰？";
  }else{
-   // MASTER 7の1人を外して、代わりに50ツボからニセモノを1人混ぜる
+   // MASTER 7の1人を外し、ニセモノ1人を混ぜ、上段は毎回完全シャッフル
    const intruder=shuffle(nonMaster)[0];
    q.intruder=intruder;
    const shown=shuffle([...names.filter(n=>n!==q.answer),intruder]);
    document.getElementById("missingBox").innerHTML=
      shown.map(n=>`<span class="pill">${n}</span>`).join("");
-   // 「誰やお前」は表示中のニセモノを当てる
+
    q.answer=intruder;
-   opts=shuffle([intruder,...shuffle(names).slice(0,3)]);
+
+   // 誰やお前問題も、下に上段と同じMASTER 7を出さない。
+   // 正解の乱入者＋上に存在しない別の非MASTERを3つ
+   const otherNonMaster=nonMaster.filter(n=>n!==intruder && !shown.includes(n));
+   opts=shuffle([intruder,...shuffle(otherNonMaster).slice(0,3)]);
    instruction="誰やお前🤣 MASTER 7じゃない耳つぼを探して。";
  }
 
@@ -354,6 +359,7 @@ function renderMissing(){
  document.getElementById("missingFeedback").textContent=instruction;
  document.getElementById("missingNext").style.display="none";
 }
+
 function answerMissing(v,b,answer,type){
  if(mlocked)return;mlocked=true;
  [...document.querySelectorAll("#missingChoices .choice")].forEach(x=>{
