@@ -136,7 +136,7 @@ button:active{transform:scale(.985)}
   <div class="card">
     <div class="qno" id="mno"></div>
     <div class="progress"><i id="mbar"></i></div>
-    <div class="question">MASTER 7から消えたん誰や？</div>
+    <div class="question"><span id="missingTitle">MASTER 7から消えたん誰や？</span></div>
     <div class="missingBox" id="missingBox"></div>
     <div class="choices" id="missingChoices"></div>
     <div class="feedback" id="missingFeedback">抜けてる1つを当ててな。</div>
@@ -328,6 +328,8 @@ function renderMissing(){
  const names=master7.map(x=>x.name);
  const nonMaster=all50.filter(n=>!names.includes(n));
  const box=document.getElementById("missingBox");
+ const title=document.getElementById("missingTitle");
+ title.textContent=q.type==="missing"?"MASTER 7から消えたん誰や？":"お前誰や？🤣";
  const c=document.getElementById("missingChoices");
  c.innerHTML="";
 
