@@ -93,7 +93,7 @@ button:active{transform:scale(.985)}
     <div class="lead">まず7つを覚える。<br>次に「誰の仕事や？」で叩き込む。</div>
     <div class="menu">
       <button class="primary" onclick="showLearn()">7つを覚える</button>
-      <button class="blue" onclick="startRoleQuiz()">誰の仕事や？</button>
+      <button class="blue" onclick="startRoleQuiz()">ごちゃまぜ練習</button>
       <button class="gold" onclick="startMissing()">ひとり足らんで</button>
       <button class="dark" onclick="startFinal()">MASTER 7 最終テスト</button>
     </div>
@@ -107,7 +107,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="quiz" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">誰の仕事や？</div></div>
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div></div>
   <div class="card">
     <div class="qno" id="qno"></div>
     <div class="progress"><i id="bar"></i></div>
@@ -175,21 +175,78 @@ function showLearn(){
  openScreen("learn");
 }
 
-function makeRoleQuestions(all=false){
- let base=all ? [...master7,...master7] : shuffle(master7);
- return base.map((p,i)=>{
-   let wrong=shuffle(master7.filter(x=>x.name!==p.name)).slice(0,3);
-   return {q:`「${p.role}」<br>担当はどれ？`,answer:p.name, choices:shuffle([p,...wrong]).map(x=>x.name)};
- });
+const all50 = ["神門","角窩中","内生殖器","交感","坐骨神経","股関節","膝","踝","風渓","腰仙椎","胸椎","頸椎","腕","肘","肩","鎖骨","後頭","側頭","前頭","大脳皮質下","顎","歯","内耳","目","扁桃体","内分泌","三焦","肺","心","気管","副腎","飢点","内鼻","咽喉","口","食道","噴門","胃","小腸","大腸","腎","膀胱","艇角","肝","脾","耳中","肛門","耳先","耳輪","耳迷根"];
+const mNames=master7.map(x=>x.name);
+const aliases=master7.filter(x=>x.alias);
+
+function distractors(answer,n=3, pool=all50){
+ return shuffle(pool.filter(x=>x!==answer)).slice(0,n);
+}
+function qRoleToName(p){
+ return {q:`「${p.role}」<br>この役割のMASTER 7は？`,answer:p.name,
+ choices:shuffle([p.name,...distractors(p.name)])};
+}
+function qNameToRole(p){
+ const roles=master7.filter(x=>x.name!==p.name).map(x=>x.role);
+ return {q:`<b>${p.name}</b> の役割はどれ？`,answer:p.role,
+ choices:shuffle([p.role,...shuffle(roles).slice(0,3)])};
+}
+function qAliasToName(p){
+ return {q:`「${p.alias}」と呼ばれるのは？`,answer:p.name,
+ choices:shuffle([p.name,...distractors(p.name)])};
+}
+function qInMaster(){
+ const answer=shuffle(mNames)[0];
+ const non=all50.filter(x=>!mNames.includes(x));
+ return {q:"MASTER 7に入っているのはどれ？",answer,
+ choices:shuffle([answer,...shuffle(non).slice(0,3)])};
+}
+function qNotMaster(){
+ const answer=shuffle(all50.filter(x=>!mNames.includes(x)))[0];
+ return {q:"MASTER 7に入っていないのはどれ？",answer,
+ choices:shuffle([answer,...shuffle(mNames).slice(0,3)])};
+}
+function qPair(){
+ const p=shuffle(master7)[0];
+ const wrongP=shuffle(master7.filter(x=>x.name!==p.name))[0];
+ const correct=`${p.name} ＝ ${p.role}`;
+ const wrongs=[
+  `${p.name} ＝ ${wrongP.role}`,
+  `${wrongP.name} ＝ ${p.role}`,
+  `${shuffle(all50.filter(x=>!mNames.includes(x)))[0]} ＝ ${p.role}`
+ ];
+ return {q:"正しい組み合わせはどれ？",answer:correct,choices:shuffle([correct,...wrongs])};
+}
+function qAliasPair(){
+ const p=shuffle(aliases)[0];
+ const correct=`${p.alias} ＝ ${p.name}`;
+ const wrongNames=shuffle(all50.filter(x=>x!==p.name)).slice(0,3);
+ return {q:"正しい組み合わせはどれ？",answer:correct,
+ choices:shuffle([correct,...wrongNames.map(n=>`${p.alias} ＝ ${n}`)])};
+}
+function buildMixed(count,final=false){
+ let makers=[qRoleToName,qNameToRole,qInMaster,qNotMaster,qPair,qAliasToName,qAliasPair];
+ let out=[];
+ for(let i=0;i<count;i++){
+   const maker=shuffle(makers)[0];
+   let p=shuffle(maker===qAliasToName||maker===qAliasPair?aliases:master7)[0];
+   out.push((maker===qInMaster||maker===qNotMaster||maker===qPair||maker===qAliasPair)?maker():maker(p));
+ }
+ if(final){
+   // 最終テストは50ツボ判別問題を多めにする
+   out[0]=qInMaster(); out[1]=qNotMaster(); out[2]=qInMaster(); out[3]=qNotMaster();
+   out=shuffle(out);
+ }
+ return out;
 }
 
 function startRoleQuiz(){
- mode="role";questions=makeRoleQuestions(false);qi=0;score=0;
- document.getElementById("quizTitle").textContent="誰の仕事や？";
+ mode="role";questions=buildMixed(10,false);qi=0;score=0;
+ document.getElementById("quizTitle").textContent="ごちゃまぜ練習";
  openScreen("quiz");renderQ();
 }
 function startFinal(){
- mode="final";questions=shuffle(makeRoleQuestions(true)).slice(0,10);qi=0;score=0;
+ mode="final";questions=buildMixed(15,true);qi=0;score=0;
  document.getElementById("quizTitle").textContent="MASTER 7 最終テスト";
  openScreen("quiz");renderQ();
 }
