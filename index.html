@@ -87,6 +87,11 @@ button:active{transform:scale(.985)}
 .allEarBox{background:#fff7fa;border:1px solid #f3cbd5;border-radius:18px;padding:12px;margin:0 0 14px;text-align:center}
 .allEarBox b{display:block;margin-bottom:4px}
 .allEarLabels{font-size:12px;line-height:1.7;color:#6c5a5a;margin-top:6px}
+
+#missingBox .intruderPick{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+#missingBox .intruderPick.correct{background:#dff5e9!important;border-color:#55b987!important;color:#176b48!important}
+#missingBox .intruderPick.wrong{background:#ffe1e5!important;border-color:#e77d8d!important;color:#a12e42!important}
+#missingBox .intruderPick:disabled{opacity:1}
 </style>
 </head>
 <body>
@@ -322,41 +327,37 @@ function renderMissing(){
 
  const names=master7.map(x=>x.name);
  const nonMaster=all50.filter(n=>!names.includes(n));
- let opts, instruction;
+ const box=document.getElementById("missingBox");
+ const c=document.getElementById("missingChoices");
+ c.innerHTML="";
 
  if(q.type==="missing"){
-   // 上段も毎回完全シャッフル。？？？の位置も固定しない
+   // 6人＋？？？を毎回シャッフル
    const shown=shuffle([...names.filter(n=>n!==q.answer),"？？？"]);
-   document.getElementById("missingBox").innerHTML=
-     shown.map(n=>`<span class="pill ${n==="？？？"?"blank":""}">${n}</span>`).join("");
+   box.innerHTML=shown.map(n=>`<span class="pill ${n==="？？？"?"blank":""}">${n}</span>`).join("");
 
-   // 消去法防止：下の選択肢は上に出ているMASTER 7を使わない。
-   // 正解1つ＋MASTER 7ではない50ツボから3つ
-   opts=shuffle([q.answer,...shuffle(nonMaster).slice(0,3)]);
-   instruction="ひとり足らんで。抜けてるMASTER 7は誰？";
+   // 正解＋MASTER7以外3つ。上段と重複なし
+   const opts=shuffle([q.answer,...shuffle(nonMaster).slice(0,3)]);
+   opts.forEach(v=>{
+     const b=document.createElement("button");b.className="choice";b.textContent=v;
+     b.onclick=()=>answerMissing(v,b,q.answer,"missing");
+     c.appendChild(b);
+   });
+   document.getElementById("missingFeedback").textContent="ひとり足らんで。抜けてるMASTER 7は誰？";
  }else{
-   // MASTER 7の1人を外し、ニセモノ1人を混ぜ、上段は毎回完全シャッフル
+   // 6人のMASTER7＋偽物1人を完全シャッフル
    const intruder=shuffle(nonMaster)[0];
-   q.intruder=intruder;
-   const shown=shuffle([...names.filter(n=>n!==q.answer),intruder]);
-   document.getElementById("missingBox").innerHTML=
-     shown.map(n=>`<span class="pill">${n}</span>`).join("");
-
    q.answer=intruder;
+   const masterSix=shuffle(names).slice(0,6);
+   const shown=shuffle([...masterSix,intruder]);
 
-   // 誰やお前問題も、下に上段と同じMASTER 7を出さない。
-   // 正解の乱入者＋上に存在しない別の非MASTERを3つ
-   const otherNonMaster=nonMaster.filter(n=>n!==intruder && !shown.includes(n));
-   opts=shuffle([intruder,...shuffle(otherNonMaster).slice(0,3)]);
-   instruction="誰やお前🤣 MASTER 7じゃない耳つぼを探して。";
+   // 「誰やお前」は上の札そのものをタップして回答
+   box.innerHTML=shown.map(n=>`<button type="button" class="pill intruderPick" data-name="${n}">${n}</button>`).join("");
+   box.querySelectorAll(".intruderPick").forEach(b=>{
+     b.onclick=()=>answerIntruder(b.dataset.name,b,intruder);
+   });
+   document.getElementById("missingFeedback").textContent="誰やお前🤣 MASTER 7じゃない耳つぼを上から直接タップ。";
  }
-
- const c=document.getElementById("missingChoices");c.innerHTML="";
- opts.forEach(v=>{
-   const b=document.createElement("button");b.className="choice";b.textContent=v;
-   b.onclick=()=>answerMissing(v,b,q.answer,q.type);c.appendChild(b);
- });
- document.getElementById("missingFeedback").textContent=instruction;
  document.getElementById("missingNext").style.display="none";
 }
 
@@ -368,15 +369,31 @@ function answerMissing(v,b,answer,type){
  });
  if(v===answer){
    mscore++;
-   document.getElementById("missingFeedback").textContent=
-     type==="missing"?"○ おるべき人、帰ってきたで🤣":"○ 発見🤣 お前MASTER 7ちゃうやろ。";
+   document.getElementById("missingFeedback").textContent="○ おるべき人、帰ってきたで🤣";
  }else{
-   document.getElementById("missingFeedback").innerHTML=
-     type==="missing"?`× 足らんかったんは <b>${answer}</b> やで。`:`× 乱入してたんは <b>${answer}</b> やで🤣`;
+   document.getElementById("missingFeedback").innerHTML=`× 足らんかったんは <b>${answer}</b> やで。`;
  }
  document.getElementById("mbar").style.width=`${((mi+1)/missingQuestions.length)*100}%`;
  document.getElementById("missingNext").style.display="block";
 }
+
+function answerIntruder(v,b,answer){
+ if(mlocked)return;mlocked=true;
+ document.querySelectorAll("#missingBox .intruderPick").forEach(x=>{
+   if(x.dataset.name===answer)x.classList.add("correct");
+   else if(x===b)x.classList.add("wrong");
+   x.disabled=true;
+ });
+ if(v===answer){
+   mscore++;
+   document.getElementById("missingFeedback").textContent="○ 発見🤣 お前MASTER 7ちゃうやろ。";
+ }else{
+   document.getElementById("missingFeedback").innerHTML=`× 乱入してたんは <b>${answer}</b> やで🤣`;
+ }
+ document.getElementById("mbar").style.width=`${((mi+1)/missingQuestions.length)*100}%`;
+ document.getElementById("missingNext").style.display="block";
+}
+
 function nextMissing(){
  mi++;
  if(mi>=missingQuestions.length){showResult(mscore,missingQuestions.length);return}
