@@ -105,6 +105,30 @@ button:active{transform:scale(.985)}
 .practicalBadge{display:inline-block;padding:7px 13px;border-radius:999px;background:#fff0f4;font-weight:800;margin-bottom:8px}
 
 .topbar .pageLogo{width:48px;height:48px;object-fit:contain;flex:0 0 48px;margin-left:auto}
+
+.topbar{
+  display:grid!important;
+  grid-template-columns:82px minmax(0,1fr) 48px!important;
+  align-items:center!important;
+  gap:8px!important;
+  width:100%!important;
+  margin-bottom:12px!important;
+}
+.topbar .back{width:82px!important;margin:0!important;padding:11px 8px!important}
+.topbar .title{
+  min-width:0!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  font-size:18px!important;
+  line-height:1.2!important;
+}
+.topbar .pageLogo{
+  display:block!important;
+  width:44px!important;
+  height:44px!important;
+  object-fit:contain!important;
+  margin:0!important;
+}
 </style>
 </head>
 <body>
