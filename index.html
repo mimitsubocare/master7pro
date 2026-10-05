@@ -306,35 +306,68 @@ function nextQuestion(){
 
 function startMissing(){
  mode="missing";mi=0;mscore=0;
- missingQuestions=shuffle(master7).slice(0,7).map(p=>p.name);
+ // 7問。毎回「ひとり足らんで」と「誰やお前」を混ぜる
+ missingQuestions=shuffle(master7).map((p,i)=>({
+   type:i<4?"missing":"intruder",
+   answer:p.name
+ }));
+ missingQuestions=shuffle(missingQuestions);
  openScreen("missing");renderMissing();
 }
 function renderMissing(){
  mlocked=false;
- const answer=missingQuestions[mi];
+ const q=missingQuestions[mi];
  document.getElementById("mno").textContent=`Q ${mi+1} / ${missingQuestions.length}`;
  document.getElementById("mbar").style.width=`${(mi/missingQuestions.length)*100}%`;
+
  const names=master7.map(x=>x.name);
- const shown=names.map(n=>n===answer?"？？？":n);
- document.getElementById("missingBox").innerHTML=shown.map(n=>`<span class="pill ${n==="？？？"?"blank":""}">${n}</span>`).join("");
- const wrong=shuffle(names.filter(n=>n!==answer)).slice(0,3);
- const opts=shuffle([answer,...wrong]);
+ const nonMaster=all50.filter(n=>!names.includes(n));
+ let opts, instruction;
+
+ if(q.type==="missing"){
+   // 正解の1人を抜き、残り6人は毎回順番をバラバラにする
+   const shown=shuffle(names.filter(n=>n!==q.answer));
+   document.getElementById("missingBox").innerHTML=
+     shown.map(n=>`<span class="pill">${n}</span>`).join("")+
+     `<span class="pill blank">？？？</span>`;
+   // 選択肢のハズレは50ツボからMASTER 7以外を乱入
+   opts=shuffle([q.answer,...shuffle(nonMaster).slice(0,3)]);
+   instruction="ひとり足らんで。抜けてるMASTER 7は誰？";
+ }else{
+   // MASTER 7の1人を外して、代わりに50ツボからニセモノを1人混ぜる
+   const intruder=shuffle(nonMaster)[0];
+   q.intruder=intruder;
+   const shown=shuffle([...names.filter(n=>n!==q.answer),intruder]);
+   document.getElementById("missingBox").innerHTML=
+     shown.map(n=>`<span class="pill">${n}</span>`).join("");
+   // 「誰やお前」は表示中のニセモノを当てる
+   q.answer=intruder;
+   opts=shuffle([intruder,...shuffle(names).slice(0,3)]);
+   instruction="誰やお前🤣 MASTER 7じゃない耳つぼを探して。";
+ }
+
  const c=document.getElementById("missingChoices");c.innerHTML="";
  opts.forEach(v=>{
    const b=document.createElement("button");b.className="choice";b.textContent=v;
-   b.onclick=()=>answerMissing(v,b,answer);c.appendChild(b);
+   b.onclick=()=>answerMissing(v,b,q.answer,q.type);c.appendChild(b);
  });
- document.getElementById("missingFeedback").textContent="抜けてる1つを当ててな。";
+ document.getElementById("missingFeedback").textContent=instruction;
  document.getElementById("missingNext").style.display="none";
 }
-function answerMissing(v,b,answer){
+function answerMissing(v,b,answer,type){
  if(mlocked)return;mlocked=true;
  [...document.querySelectorAll("#missingChoices .choice")].forEach(x=>{
    if(x.textContent===answer)x.classList.add("correct");
    else if(x===b)x.classList.add("wrong");
  });
- if(v===answer){mscore++;document.getElementById("missingFeedback").textContent="○ おるべき人、帰ってきたで🤣";}
- else document.getElementById("missingFeedback").innerHTML=`× 足らんかったんは <b>${answer}</b> やで。`;
+ if(v===answer){
+   mscore++;
+   document.getElementById("missingFeedback").textContent=
+     type==="missing"?"○ おるべき人、帰ってきたで🤣":"○ 発見🤣 お前MASTER 7ちゃうやろ。";
+ }else{
+   document.getElementById("missingFeedback").innerHTML=
+     type==="missing"?`× 足らんかったんは <b>${answer}</b> やで。`:`× 乱入してたんは <b>${answer}</b> やで🤣`;
+ }
  document.getElementById("mbar").style.width=`${((mi+1)/missingQuestions.length)*100}%`;
  document.getElementById("missingNext").style.display="block";
 }
