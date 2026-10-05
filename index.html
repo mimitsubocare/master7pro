@@ -219,7 +219,7 @@ function distractors(answer,n=3, pool=all50){
 }
 function qRoleToName(p){
  return {q:`「${p.role}」<br>この役割のMASTER 7は？`,answer:p.name,
- choices:shuffle([p.name,...distractors(p.name)])};
+ choices:shuffle([...mNames])};
 }
 function qNameToRole(p){
  const roles=master7.filter(x=>x.name!==p.name).map(x=>x.role);
