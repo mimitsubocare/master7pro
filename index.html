@@ -79,6 +79,14 @@ button:active{transform:scale(.985)}
 .rank{font-size:21px;font-weight:950;margin:8px 0}
 .smallchar{width:150px;max-height:155px;object-fit:contain;margin:0 auto 8px;display:block}
 .footer{text-align:center;font-size:11px;color:#9c858b;margin-top:16px}
+
+.learnEar{position:relative;width:min(250px,72vw);margin:12px auto 14px}
+.learnEar img{display:block;width:100%;height:auto}
+.learnDot{position:absolute;width:18px;height:18px;border-radius:50%;background:#e94f71;border:3px solid #fff;box-shadow:0 0 0 3px rgba(233,79,113,.25),0 2px 7px rgba(0,0,0,.25);transform:translate(-50%,-50%);z-index:2}
+.learnDot.all{width:14px;height:14px;border-width:2px}
+.allEarBox{background:#fff7fa;border:1px solid #f3cbd5;border-radius:18px;padding:12px;margin:0 0 14px;text-align:center}
+.allEarBox b{display:block;margin-bottom:4px}
+.allEarLabels{font-size:12px;line-height:1.7;color:#6c5a5a;margin-top:6px}
 </style>
 </head>
 <body>
@@ -164,11 +172,22 @@ function openScreen(id){screensOff();document.getElementById(id).classList.add("
 function goHome(){openScreen("home")}
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
 
+const master7Pos={
+ "耳中":[49.7,47.4],"大脳皮質下":[48.5,64.6],"神門":[45.7,27.8],
+ "交感":[31.7,30.5],"副腎":[27.3,55.7],"内分泌":[29,66.6],"耳先":[58.2,5.9]
+};
+function earMap(names,all=false){
+ return `<div class="learnEar"><img src="./ear_base.PNG" alt="耳つぼ位置図">`+
+ names.map(n=>{const p=master7Pos[n];return `<span class="learnDot${all?' all':''}" title="${n}" style="left:${p[0]}%;top:${p[1]}%"></span>`}).join("")+
+ `</div>`;
+}
 function showLearn(){
  const box=document.getElementById("learnList");
- box.innerHTML=master7.map((p,i)=>`
+ box.innerHTML=`<div class="allEarBox"><b>MASTER 7 全部の位置</b>${earMap(master7.map(x=>x.name),true)}<div class="allEarLabels">${master7.map(x=>x.name).join(" ／ ")}</div></div>`+
+ master7.map((p,i)=>`
  <div class="card">
    <span class="num">${i+1}</span><span class="point">${p.name}</span>
+   ${earMap([p.name])}
    ${p.alias?`<div class="alias">${p.alias}</div>`:`<div class="alias">　</div>`}
    <div class="role">${p.role}</div>
  </div>`).join("");
