@@ -29,7 +29,7 @@ body{
 .kicker{font-size:12px;font-weight:800;letter-spacing:.14em;color:#a36b79}
 h1{font-size:38px;line-height:1;margin:7px 0 4px;color:#65404a;letter-spacing:.03em}
 .sub{font-size:14px;font-weight:800;color:#a36b79;margin-bottom:6px}
-.hero img{display:block;width:min(78%,350px);max-height:330px;object-fit:contain;margin:2px auto 0}
+.hero .mcsLogo{display:block;width:min(62%,240px);max-height:100px;object-fit:contain;margin:2px auto 8px}.hero .masterChar{display:block;width:min(42%,170px);max-height:170px;object-fit:contain;margin:4px auto 0}
 .lead{font-weight:800;font-size:15px;line-height:1.7;margin:4px auto 12px}
 .menu{display:grid;gap:10px}
 button{
@@ -110,10 +110,11 @@ button:active{transform:scale(.985)}
 
 <section id="home" class="screen active">
   <div class="hero">
+    <img class="mcsLogo" src="./mcs_logo.JPG" alt="協会ロゴ">
     <div class="kicker">耳つぼケア 学習アプリ</div>
     <h1>MASTER 7</h1>
     <div class="sub">7つ、ちゃんと使える？</div>
-    <img src="./MASTER7.PNG" alt="MASTER 7">
+    <img class="masterChar" src="./MASTER7.PNG" alt="MASTER 7">
     <div class="lead">まず7つを覚える。<br>次に「誰の仕事や？」で叩き込む。</div>
     <div class="menu">
       <button class="primary" onclick="showLearn()">7つを覚える</button>
