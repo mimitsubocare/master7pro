@@ -112,6 +112,13 @@ button:active{transform:scale(.985)}
 .finalThink img{width:96px;height:96px;object-fit:contain}
 .finalThink small{display:block;font-weight:800;color:#9a6b78;margin-top:-4px}
 @keyframes popIn{0%{transform:scale(.65);opacity:0}75%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+
+#learn,#quiz,#missing,#result{position:relative}
+.cornerLogo{
+ position:absolute;right:4px;top:2px;width:42px;height:42px;
+ object-fit:contain;z-index:20;pointer-events:none
+}
+#learn .topbar,#quiz .topbar,#missing .topbar{padding-right:50px}
 </style>
 </head>
 <body>
@@ -136,11 +143,13 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="learn" class="screen">
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
   <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">7つを覚える</div></div>
   <div id="learnList"></div>
 </section>
 
 <section id="quiz" class="screen">
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
   <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div></div>
   <div class="card">
     <div class="qno" id="qno"></div>
@@ -155,6 +164,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="missing" class="screen">
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
   <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">ひとり足らんで</div></div>
   <div class="card">
     <div class="qno" id="mno"></div>
@@ -168,6 +178,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="result" class="screen">
+  <img class="cornerLogo" src="./mcs_logo.PNG" alt="協会ロゴ">
   <div class="card result">
     <img id="resultMascot" class="smallchar" src="./MASTER7.PNG" alt="">
     <div class="kicker">RESULT</div>
