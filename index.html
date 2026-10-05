@@ -103,6 +103,8 @@ button:active{transform:scale(.985)}
 .practicalEar img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
 .tapMark{position:absolute;width:22px;height:22px;border-radius:50%;border:4px solid #fff;background:#9a6b78;box-shadow:0 0 0 3px rgba(154,107,120,.25);transform:translate(-50%,-50%);pointer-events:none}
 .practicalBadge{display:inline-block;padding:7px 13px;border-radius:999px;background:#fff0f4;font-weight:800;margin-bottom:8px}
+
+.topbar .pageLogo{width:48px;height:48px;object-fit:contain;flex:0 0 48px;margin-left:auto}
 </style>
 </head>
 <body>
@@ -127,12 +129,12 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="learn" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">7つを覚える</div></div>
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">7つを覚える<img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
   <div id="learnList"></div>
 </section>
 
 <section id="quiz" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div></div>
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div id="quizTitle" class="title">ごちゃまぜ練習</div><img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
   <div class="card">
     <div class="qno" id="qno"></div>
     <div class="progress"><i id="bar"></i></div>
@@ -144,7 +146,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="missing" class="screen">
-  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">ひとり足らんで</div></div>
+  <div class="topbar"><button class="back ghost" onclick="goHome()">← TOP</button><div class="title">ひとり足らんで</div><img class="pageLogo" src="./mcs_logo.PNG" alt="協会ロゴ"></div>
   <div class="card">
     <div class="qno" id="mno"></div>
     <div class="progress"><i id="mbar"></i></div>
@@ -157,6 +159,7 @@ button:active{transform:scale(.985)}
 </section>
 
 <section id="result" class="screen">
+  <div style="text-align:right;margin-bottom:6px"><img src="./mcs_logo.PNG" alt="協会ロゴ" style="width:48px;height:48px;object-fit:contain"></div>
   <div class="card result">
     <img class="smallchar" src="./MASTER7.PNG" alt="">
     <div class="kicker">RESULT</div>
