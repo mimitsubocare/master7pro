@@ -329,7 +329,9 @@ function renderMissing(){
  const nonMaster=all50.filter(n=>!names.includes(n));
  const box=document.getElementById("missingBox");
  const title=document.getElementById("missingTitle");
- title.textContent=q.type==="missing"?"MASTER 7から消えたん誰や？":"お前誰や？🤣";
+ if(title){
+   title.textContent=q.type==="missing" ? "MASTER 7から消えたん誰や？" : "お前誰や？🤣";
+ }
  const c=document.getElementById("missingChoices");
  c.innerHTML="";
 
